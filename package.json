@@ -7,7 +7,8 @@
     "test": "NODE_ENV=test jest --setupFiles dotenv/config --runInBand",
     "test:watch": "NODE_ENV=test jest --watch --config=jest.config.js",
     "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "dev": "nodemon src/app.js",
+    "build": "vite build"
   },
   "repository": {
     "type": "git",
@@ -38,7 +39,8 @@
     "jest": "^30.0.4",
     "jest-mock-express": "^0.1.1",
     "nodemon": "^3.1.10",
-    "supertest": "^7.1.1"
+    "supertest": "^7.1.1",
+    "vite": "^7.0.2"
   },
   "jest": {
     "testEnvironment": "node",

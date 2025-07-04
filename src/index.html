@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦕 Incident Tracker - Jurassic Park</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>🦕 Incident Tracker - Jurassic Park</h1>
+            <nav>
+                <ul style="list-style: none; display: flex; gap: 2rem; margin: 0; padding: 0;">
+                    <li><a href="/" style="color: white; text-decoration: none;">🏠 Accueil</a></li>
+                    <li><a href="/new-incident.html" style="color: white; text-decoration: none;">🚨 Nouvel Incident</a></li>
+                    <li><a href="/api/incidents" style="color: white; text-decoration: none;">📊 API</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <h1>🦕 Incident Tracker - Jurassic Park</h1>
+        
+        <div class="filters">
+            <h3>Filtres</h3>
+            <form id="filter-form">
+                <div class="form-group">
+                    <label for="zone">Zone</label>
+                    <select name="zone" id="zone">
+                        <option value="">Toutes les zones</option>
+                        <option value="Zone A">Zone A</option>
+                        <option value="Zone B">Zone B</option>
+                        <option value="Zone C">Zone C</option>
+                        <option value="Zone D">Zone D</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="type">Type</label>
+                    <select name="type" id="type">
+                        <option value="">Tous les types</option>
+                        <option value="Evasion">Evasion</option>
+                        <option value="Panne">Panne</option>
+                        <option value="Blessure">Blessure</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="urgency">Urgence</label>
+                    <select name="urgency" id="urgency">
+                        <option value="">Toutes les urgences</option>
+                        <option value="basse">Basse</option>
+                        <option value="moyenne">Moyenne</option>
+                        <option value="haute">Haute</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <button type="submit" class="btn">Filtrer</button>
+                </div>
+            </form>
+        </div>
+        
+        <div style="margin-bottom: 2rem;">
+            <a href="/new-incident.html" class="btn">🚨 Nouvel incident</a>
+            <a href="/api/incidents" class="btn" style="background-color: #e74c3c;">📊 API JSON</a>
+        </div>
+        
+        <div class="incidents-list" id="incidents-container">
+            <p class="loading">Chargement des incidents... 🦴</p>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p>🦕 Incident Tracker - Jurassic Park &copy; 2025</p>
+            <p>Version 1.0.0 - Système de gestion des incidents</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Charger les incidents au démarrage
+        document.addEventListener('DOMContentLoaded', function() {
+            loadIncidents();
+            
+            // Gestion des filtres
+            document.getElementById('filter-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                loadIncidents();
+            });
+        });
+
+        // Fonction pour charger les incidents
+        async function loadIncidents() {
+            try {
+                const formData = new FormData(document.getElementById('filter-form'));
+                const params = new URLSearchParams(formData);
+                
+                const response = await fetch(`/api/incidents?${params}`);
+                const incidents = await response.json();
+                
+                displayIncidents(incidents);
+            } catch (error) {
+                console.error('Erreur lors du chargement des incidents:', error);
+                document.getElementById('incidents-container').innerHTML = 
+                    '<p class="no-incidents">❌ Erreur lors du chargement des incidents</p>';
+            }
+        }
+
+        // Fonction pour afficher les incidents
+        function displayIncidents(incidents) {
+            const container = document.getElementById('incidents-container');
+            
+            if (incidents.length === 0) {
+                container.innerHTML = '<p class="no-incidents">Aucun incident trouvé. 🦴</p>';
+                return;
+            }
+            
+            container.innerHTML = incidents.map(incident => `
+                <div class="incident-card">
+                    <div class="incident-header">
+                        <h3>${incident.title}</h3>
+                        <span class="urgency-badge urgency-${incident.urgency}">${incident.urgency}</span>
+                    </div>
+                    <div class="incident-body">
+                        <p><strong>Type:</strong> ${incident.type}</p>
+                        <p><strong>Zone:</strong> ${incident.zone}</p>
+                        ${incident.description ? `<p><strong>Description:</strong> ${incident.description}</p>` : ''}
+                        <p><strong>Statut:</strong> 
+                            <select class="status-select" data-id="${incident.id}" data-original-value="${incident.status}">
+                                <option value="ouvert" ${incident.status === 'ouvert' ? 'selected' : ''}>Ouvert</option>
+                                <option value="en_cours" ${incident.status === 'en_cours' ? 'selected' : ''}>En cours</option>
+                                <option value="résolu" ${incident.status === 'résolu' ? 'selected' : ''}>Résolu</option>
+                                <option value="fermé" ${incident.status === 'fermé' ? 'selected' : ''}>Fermé</option>
+                            </select>
+                        </p>
+                    </div>
+                    <div class="incident-actions">
+                        <button class="btn btn-escalate" data-id="${incident.id}">⬆️ Escalader urgence</button>
+                        <small class="incident-date">Créé le: ${new Date(incident.createdAt).toLocaleDateString('fr-FR')}</small>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Ajouter les événements pour les boutons d'escalade
+            document.querySelectorAll('.btn-escalate').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const incidentId = this.dataset.id;
+                    try {
+                        const response = await fetch(`/api/incidents/${incidentId}/escalate`, {
+                            method: 'PATCH'
+                        });
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            showNotification('Urgence escaladée avec succès!', 'success');
+                            loadIncidents(); // Recharger la liste
+                        } else {
+                            showNotification(result.error || 'Erreur lors de l\'escalade', 'error');
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        showNotification('Erreur lors de l\'escalade', 'error');
+                    }
+                });
+            });
+            
+            // Ajouter les événements pour les changements de statut
+            document.querySelectorAll('.status-select').forEach(select => {
+                select.addEventListener('change', async function() {
+                    const incidentId = this.dataset.id;
+                    const newStatus = this.value;
+                    
+                    try {
+                        const response = await fetch(`/api/incidents/${incidentId}`, {
+                            method: 'PUT',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ status: newStatus })
+                        });
+                        const result = await response.json();
+                        
+                        if (response.ok) {
+                            showNotification('Statut mis à jour avec succès!', 'success');
+                            this.dataset.originalValue = newStatus;
+                        } else {
+                            showNotification(result.error || 'Erreur lors de la mise à jour', 'error');
+                            this.value = this.dataset.originalValue; // Remettre l'ancienne valeur
+                        }
+                    } catch (error) {
+                        console.error('Erreur:', error);
+                        showNotification('Erreur lors de la mise à jour du statut', 'error');
+                        this.value = this.dataset.originalValue;
+                    }
+                });
+            });
+        }
+
+        // Fonction pour afficher les notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 5px;
+                color: white;
+                font-weight: bold;
+                z-index: 1000;
+                transition: opacity 0.5s ease;
+                ${type === 'success' ? 'background-color: #28a745;' : 'background-color: #dc3545;'}
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 500);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+
