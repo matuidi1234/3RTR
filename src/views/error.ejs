@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Erreur - Jurassic Park</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main>
+        <div style="text-align: center; padding: 3rem;">
+            <h1>🦖 Oups ! Une erreur s'est produite</h1>
+            <div style="background-color: #f8d7da; color: #721c24; padding: 2rem; border-radius: 8px; margin: 2rem 0;">
+                <h2>Erreur détectée</h2>
+                <p><%= message %></p>
+            </div>
+            <a href="/" class="btn">🏠 Retour à l'accueil</a>
+        </div>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

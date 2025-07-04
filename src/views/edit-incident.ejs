@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modifier Incident</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <%- include('partials/header') %>
+
+    <main>
+        <h1>Modifier l'incident #<%= incident.id %></h1>
+        
+        <% if (error) { %>
+            <div class="alert error"><%= error %></div>
+        <% } %>
+        
+        <form method="POST" action="/incidents/<%= incident.id %>">
+            <div class="form-group">
+                <label>Titre</label>
+                <div class="static-value"><%= incident.title %></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Description</label>
+                <div class="static-value"><%= incident.description %></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Type</label>
+                <div class="static-value"><%= incident.type %></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Zone</label>
+                <div class="static-value"><%= incident.zone %></div>
+            </div>
+            
+            <div class="form-group">
+                <label>Urgence</label>
+                <div class="static-value"><%= incident.urgency %></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="status">Statut*</label>
+                <select id="status" name="status" required>
+                    <% statuses.forEach(status => { %>
+                        <option value="<%= status %>" <%= status === incident.status ? 'selected' : '' %>>
+                            <%= status %>
+                        </option>
+                    <% }); %>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn">Mettre à jour</button>
+            <a href="/" class="btn cancel">Retour</a>
+        </form>
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>
