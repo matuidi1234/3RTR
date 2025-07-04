@@ -10,9 +10,9 @@ describe('Incident API', () => {
 
   beforeAll(async () => {
     try {
-      sequelize = new Sequelize('mysql::memory:', { 
+      sequelize = new Sequelize('sqlite::memory:', { 
         logging: false,
-        dialect: 'mysql'
+        dialect: 'sqlite'
       });
 
     // Pass the sequelize instance to createApp
